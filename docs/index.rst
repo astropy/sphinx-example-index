@@ -8,3 +8,11 @@ Reference/API
 =============
 
 .. automodapi:: sphinx_example_index
+
+Project Information
+===================
+
+.. toctree::
+   :maxdepth: 1
+
+   changelog
