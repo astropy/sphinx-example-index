@@ -27,6 +27,9 @@ pkg_metadata = importlib_metadata.metadata('sphinx-example-index')
 rst_epilog = """
 
 .. _Astropy: https://www.astropy.org
+.. _Sphinx: https://www.sphinx-doc.org/en/master/
+.. _tox: https://tox.readthedocs.io/en/latest/
+.. _flake8: https://flake8.pycqa.org/en/latest/
 """
 
 # Configuration for intersphinx

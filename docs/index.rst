@@ -16,3 +16,4 @@ Project Information
    :maxdepth: 1
 
    changelog
+   development-guide
