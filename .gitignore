@@ -10,7 +10,7 @@ __pycache__
 *.c
 
 # Other generated files
-*/version.py
+src/sphinx_example_index/version.py
 */cython_version.py
 htmlcov
 .coverage
