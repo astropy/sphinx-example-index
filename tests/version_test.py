@@ -3,5 +3,5 @@
 from sphinx_example_index.version import version
 
 
-def test_version():
+def test_version() -> None:
     assert isinstance(version, str)
