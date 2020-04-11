@@ -21,7 +21,7 @@ jobs:
         run: python -m pip install tox
 
       - name: Run tox
-        run: tox -e py-test-cov,codestyle  # run tox using Python in path
+        run: tox -e py-test-cov,codestyle,typing  # run tox using Python in path
 
   test:
 
@@ -61,7 +61,7 @@ jobs:
         run: python -m pip install tox
 
       - name: Run tox
-        run: tox -e py-test-${{ matrix.tox-env }}  # run tox using Python in path
+        run: tox -e py-test-${{ matrix.tox-env }},typing  # run tox using Python in path
 
   docs:
 
