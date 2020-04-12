@@ -13,6 +13,7 @@ from bs4 import BeautifulSoup
 from tests.utils import is_directive_registered, is_node_registered
 
 from sphinx_example_index.marker import ExampleMarkerNode, EXAMPLE_SRC_DIV_CLASS
+from sphinx_example_index.preprocessor import detect_examples
 
 if TYPE_CHECKING:
     from io import StringIO
@@ -57,3 +58,45 @@ def test_example_directive_targets(
         divs = soup.find_all("div", id=known_target_refid)
         assert len(divs)
         assert EXAMPLE_SRC_DIV_CLASS in divs[0]["class"]
+
+
+@pytest.mark.sphinx("dummy", testroot="example-index")
+def test_detect_examples(
+    app: "Sphinx", status: "StringIO", warning: "StringIO"
+) -> None:
+    """Test that the detect_examples function can match "example"
+    directives using the "page-with-examples.rst" test case.
+    """
+    test_filepath = os.path.join(app.srcdir, "page-with-examples.rst")
+    examples = list(detect_examples(test_filepath, app.env))
+
+    assert examples[0].title == "Example with two paragraphs"
+    assert examples[0].tags == set()
+    assert examples[0].docname == "page-with-examples"
+    assert examples[0].docref == "/page-with-examples"
+
+    assert examples[1].title == "Tagged example"
+    assert examples[1].tags == set(["tag-a"])
+    assert repr(examples[1]) == (
+        "ExampleSource('Tagged example', 'page-with-examples', tags={'tag-a'})"
+    )
+    assert examples[1].docname == "page-with-examples"
+    assert examples[1].docref == "/page-with-examples"
+
+    assert examples[2].title == "Example with multiple tags"
+    assert examples[2].tags == set(["tag-a", "tag-b"])
+    assert examples[2].docname == "page-with-examples"
+    assert examples[2].docref == "/page-with-examples"
+
+    assert examples[3].title == "Example with subsections"
+    assert examples[3].tags == set(["tag-b"])
+    assert examples[3].docname == "page-with-examples"
+    assert examples[3].docref == "/page-with-examples"
+
+    # Test comparisons (by title)
+    assert examples[0] < examples[1]
+    assert examples[0] <= examples[1]
+    assert examples[1] > examples[0]
+    assert examples[1] >= examples[0]
+    assert examples[1] != examples[0]
+    assert examples[0] == examples[0]
