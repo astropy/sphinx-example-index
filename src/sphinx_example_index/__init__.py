@@ -12,6 +12,13 @@ from typing import TYPE_CHECKING, Any, Dict
 
 from sphinx_example_index.version import version
 
+from sphinx_example_index.marker import (
+    ExampleMarkerNode,
+    visit_example_marker_html,
+    depart_example_marker_html,
+    ExampleMarkerDirective,
+)
+
 if TYPE_CHECKING:
     from sphinx.application import Sphinx
 
@@ -33,6 +40,13 @@ def setup(app: "Sphinx") -> Dict[str, Any]:
         http://www.sphinx-doc.org/en/master/extdev/index.html#extension-metadata
         for more information.
     """
+    app.add_node(
+        ExampleMarkerNode,
+        html=(visit_example_marker_html, depart_example_marker_html),
+    )
+
+    app.add_directive("example", ExampleMarkerDirective)
+
     return {
         "version": __version__,
         # env_version needs to be incremented when the persisted data
