@@ -12,6 +12,7 @@ from bs4 import BeautifulSoup
 
 from tests.utils import is_directive_registered, is_node_registered
 
+from sphinx_example_index.pages import ExamplePage
 from sphinx_example_index.marker import ExampleMarkerNode, EXAMPLE_SRC_DIV_CLASS
 from sphinx_example_index.preprocessor import detect_examples
 
@@ -100,3 +101,28 @@ def test_detect_examples(
     assert examples[1] >= examples[0]
     assert examples[1] != examples[0]
     assert examples[0] == examples[0]
+
+
+@pytest.mark.sphinx("dummy", testroot="example-index")
+def test_example_page(
+    app: "Sphinx", status: "StringIO", warning: "StringIO"
+) -> None:
+    """Test ExamplePage using examples from the "page-with-examples.rst"
+    test case.
+    """
+    env = app.env
+
+    # Test using example-with-two-paragraphs
+    test_filepath = os.path.join(app.srcdir, "page-with-examples.rst")
+    examples = list(detect_examples(test_filepath, env))
+    example = examples[0]
+
+    examples_dir = os.path.join(app.srcdir, "examples")
+    example_page = ExamplePage(
+        source=example, examples_dir=examples_dir, app=app
+    )
+
+    assert example_page.source == example
+    assert example_page.rel_docref == "example-with-two-paragraphs"
+    assert example_page.docref == "/examples/example-with-two-paragraphs"
+    assert example_page.filepath.endswith(example_page.docref + ".rst")
