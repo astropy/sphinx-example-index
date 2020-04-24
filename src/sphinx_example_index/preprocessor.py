@@ -7,16 +7,21 @@ __all__ = [
     "EXAMPLE_PATTERN",
     "ExampleSource",
     "detect_examples",
+    "preprocess_examples",
 ]
 
+import os
 import re
+import shutil
 from typing import Iterator, Set, TYPE_CHECKING
 
 from sphinx.util.logging import getLogger
 
 from sphinx_example_index.identifiers import format_title_to_example_id
+from sphinx_example_index.pages import ExamplePage, Renderer
 
 if TYPE_CHECKING:
+    from sphinx.application import Sphinx
     from sphinx.environment import BuildEnvironment
 
 
@@ -43,6 +48,57 @@ See also
 --------
 detect_examples
 """
+
+
+def preprocess_examples(app: "Sphinx") -> None:
+    """Preprocess the Sphinx project to detect examples and generate stub
+    reStructuredText pages for each example and indexes of examples.
+
+    This function is run as part of the ``builder-inited`` event.
+
+    Parameters
+    ----------
+    app : `sphinx.application.Sphinx`
+        The application instance.
+    """
+    logger = getLogger(__name__)
+    config = app.config  # type: ignore
+
+    if config.example_index_enabled is False:
+        logger.debug("[sphinx_example_index] Skipping example index (disabled)")
+        return
+
+    logger.debug("[sphinx_example_index] Preprocessing example pages")
+
+    # Create directory for example pages inside the documentation source dir.
+    # Incrememental rebuilds of the example gallery aren't supported yet;
+    # so for now the examples directory is cleared out before each rebuild.
+    examples_dir = os.path.join(app.srcdir, config.example_index_dir)
+    if os.path.isdir(examples_dir):
+        shutil.rmtree(examples_dir)
+    os.makedirs(examples_dir)
+
+    renderer = Renderer(
+        builder=app.builder, h1_underline=config.example_index_h1
+    )
+
+    example_pages = []
+    example_docname_prefix = config.example_index_dir + "/"
+    for docname in app.env.found_docs:
+        if docname.startswith(example_docname_prefix):
+            # Don't scan for examples in examples directory because those
+            # docs were deleted at the start of this function.
+            continue
+        filepath = app.env.doc2path(docname)
+        for detected_example in detect_examples(filepath, app.env):
+            example_page = ExamplePage(
+                source=detected_example, examples_dir=examples_dir, app=app
+            )
+            example_pages.append(example_page)
+    example_pages.sort()
+
+    for example_page in example_pages:
+        example_page.render_and_save(renderer)
 
 
 class ExampleSource:

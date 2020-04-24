@@ -18,6 +18,7 @@ from sphinx_example_index.marker import (
     depart_example_marker_html,
     ExampleMarkerDirective,
 )
+from sphinx_example_index.preprocessor import preprocess_examples
 
 if TYPE_CHECKING:
     from sphinx.application import Sphinx
@@ -46,6 +47,18 @@ def setup(app: "Sphinx") -> Dict[str, Any]:
     )
 
     app.add_directive("example", ExampleMarkerDirective)
+
+    app.connect("builder-inited", preprocess_examples)
+
+    # Toggles the gallery generation on or off.
+    app.add_config_value("example_index_enabled", False, "env")
+
+    # Configures the directory, relative to the documentation source root,
+    # where example pages are created.
+    app.add_config_value("example_index_dir", "examples", "env")
+
+    # Configures the character to use for h1 underlines in rst
+    app.add_config_value("example_index_h1", "#", "env")
 
     return {
         "version": __version__,

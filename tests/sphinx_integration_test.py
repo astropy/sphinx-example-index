@@ -31,6 +31,11 @@ def test_setup(app: "Sphinx", status: "StringIO", warning: "StringIO") -> None:
     # Check registered directives
     assert is_directive_registered("example")
 
+    # Check registered configs
+    assert "example_index_dir" in app.config  # type: ignore
+    assert "example_index_enabled" in app.config  # type: ignore
+    assert "example_index_h1" in app.config  # type: ignore
+
     # Check registered nodes
     assert is_node_registered(ExampleMarkerNode)
 
@@ -121,7 +126,9 @@ def test_example_page(
     examples = list(detect_examples(test_filepath, env))
     example = examples[0]
 
-    examples_dir = os.path.join(app.srcdir, "examples")
+    examples_dir = os.path.join(
+        app.srcdir, app.config.example_index_dir  # type: ignore
+    )
     example_page = ExamplePage(
         source=example, examples_dir=examples_dir, app=app
     )
@@ -158,7 +165,9 @@ def test_example_page_custom_template(
     examples = list(detect_examples(test_filepath, env))
     example = examples[0]
 
-    examples_dir = os.path.join(app.srcdir, "examples")
+    examples_dir = os.path.join(
+        app.srcdir, app.config.example_index_dir  # type: ignore
+    )
     example_page = ExamplePage(
         source=example, examples_dir=examples_dir, app=app
     )
@@ -173,3 +182,28 @@ def test_example_page_custom_template(
         "Custom template!"
     )
     assert rendered_page == expected
+
+
+@pytest.mark.sphinx("dummy", testroot="example-index")
+def test_preprocessor(
+    app: "Sphinx", status: "StringIO", warning: "StringIO"
+) -> None:
+    """Test that the preprocessor builds all of the expected standalone
+    example pages.
+
+    This test uses the "example-index" test case.
+    """
+    examples_source_dir = os.path.join(
+        app.srcdir, app.config.example_index_dir  # type: ignore
+    )
+    example_page_names = [
+        "example-with-two-paragraphs.rst",
+        "tagged-example.rst",
+        "example-with-multiple-tags.rst",
+        "example-with-subsections.rst",
+    ]
+    example_page_paths = [
+        os.path.join(examples_source_dir, p) for p in example_page_names
+    ]
+    for path in example_page_paths:
+        assert os.path.exists(path)

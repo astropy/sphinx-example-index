@@ -5,3 +5,4 @@ extensions = [
 exclude_patterns = ["_build", "_includes"]
 suppress_warnings = ["app.add_directive", "app.add_node"]
 default_role = "obj"
+example_index_enabled = True
