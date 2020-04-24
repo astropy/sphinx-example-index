@@ -4,12 +4,12 @@
 __all__ = ["ExamplePage"]
 
 import os
-
 from typing import TYPE_CHECKING
 
 if TYPE_CHECKING:
     from sphinx.application import Sphinx
     from sphinx_example_index.preprocessor import ExampleSource
+    from sphinx_example_index.pages import Renderer
 
 
 class ExamplePage:
@@ -109,3 +109,37 @@ class ExamplePage:
         standalone example page is rendered.
         """
         return os.path.join(self._examples_dir, self.rel_docref + ".rst")
+
+    def render(self, renderer: "Renderer") -> str:
+        """Render the source for the standalone example page using a
+        ``astropy_example/examplepage.rst`` template.
+
+        Parameters
+        ----------
+        renderer : sphinx_example_index.pages.Renderer
+            The Jinja template renderer.
+
+        Returns
+        -------
+        content : str
+            The content of the standalone example page.
+        """
+        context = {
+            "title": self.source.title,
+            # 'tag_pages': self.tag_pages,
+            "example": self.source,
+        }
+        return renderer.render("example_index/examplepage.rst", context)
+
+    def render_and_save(self, renderer: "Renderer") -> None:
+        """Render the standalone example page and write it to `filepath`
+        using the ``example_index/examplepage.rst`` template.
+
+        Parameters
+        ----------
+        renderer : sphinx_example_index.pages.Renderer
+            The Jinja template renderer.
+        """
+        content = self.render(renderer)
+        with open(self.filepath, "w") as fh:
+            fh.write(content)

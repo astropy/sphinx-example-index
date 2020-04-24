@@ -12,7 +12,7 @@ from bs4 import BeautifulSoup
 
 from tests.utils import is_directive_registered, is_node_registered
 
-from sphinx_example_index.pages import ExamplePage
+from sphinx_example_index.pages import ExamplePage, Renderer
 from sphinx_example_index.marker import ExampleMarkerNode, EXAMPLE_SRC_DIV_CLASS
 from sphinx_example_index.preprocessor import detect_examples
 
@@ -107,10 +107,14 @@ def test_detect_examples(
 def test_example_page(
     app: "Sphinx", status: "StringIO", warning: "StringIO"
 ) -> None:
-    """Test ExamplePage using examples from the "page-with-examples.rst"
-    test case.
+    """Test ExamplePage and Renderer using examples from the
+    "page-with-examples.rst" test case.
+
+    This test avoids the complete preprocessing pipeline and just tests the
+    template rendering step.
     """
     env = app.env
+    renderer = Renderer(builder=app.builder, h1_underline="#")
 
     # Test using example-with-two-paragraphs
     test_filepath = os.path.join(app.srcdir, "page-with-examples.rst")
@@ -126,3 +130,12 @@ def test_example_page(
     assert example_page.rel_docref == "example-with-two-paragraphs"
     assert example_page.docref == "/examples/example-with-two-paragraphs"
     assert example_page.filepath.endswith(example_page.docref + ".rst")
+
+    rendered_page = example_page.render(renderer)
+    expected = (
+        "Example with two paragraphs\n"
+        "###########################\n"
+        "\n"
+        "From :doc:`/page-with-examples`."
+    )
+    assert rendered_page == expected
