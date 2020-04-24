@@ -139,3 +139,37 @@ def test_example_page(
         "From :doc:`/page-with-examples`."
     )
     assert rendered_page == expected
+
+
+@pytest.mark.sphinx("dummy", testroot="custom-template")
+def test_example_page_custom_template(
+    app: "Sphinx", status: "StringIO", warning: "StringIO"
+) -> None:
+    """Test ExamplePage and Renderer using examples from the
+    "page-with-examples.rst" test case for the "custom-template" test case.
+
+    This demonstrates that user templates, configured via the
+    ``templates_path`` configuration variable, override the built-in templates.
+    """
+    env = app.env
+    renderer = Renderer(builder=app.builder, h1_underline="#")
+
+    test_filepath = os.path.join(app.srcdir, "page-with-examples.rst")
+    examples = list(detect_examples(test_filepath, env))
+    example = examples[0]
+
+    examples_dir = os.path.join(app.srcdir, "examples")
+    example_page = ExamplePage(
+        source=example, examples_dir=examples_dir, app=app
+    )
+
+    rendered_page = example_page.render(renderer)
+    expected = (
+        "Example title\n"
+        "#############\n"
+        "\n"
+        "From :doc:`/page-with-examples`.\n"
+        "\n"
+        "Custom template!"
+    )
+    assert rendered_page == expected
