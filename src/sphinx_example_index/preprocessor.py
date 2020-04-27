@@ -18,7 +18,7 @@ from typing import Iterator, Set, TYPE_CHECKING
 from sphinx.util.logging import getLogger
 
 from sphinx_example_index.identifiers import format_title_to_example_id
-from sphinx_example_index.pages import ExamplePage, Renderer
+from sphinx_example_index.pages import ExamplePage, TagPage, IndexPage, Renderer
 
 if TYPE_CHECKING:
     from sphinx.application import Sphinx
@@ -97,8 +97,18 @@ def preprocess_examples(app: "Sphinx") -> None:
             example_pages.append(example_page)
     example_pages.sort()
 
+    # Generate and render tag pages first because doing so associates tags
+    # with index pages.
+    for tag_page in TagPage.generate_tag_pages(
+        example_pages=example_pages, examples_dir=examples_dir, app=app
+    ):
+        tag_page.render_and_save(renderer)
+
     for example_page in example_pages:
         example_page.render_and_save(renderer)
+
+    index_page = IndexPage(example_pages, examples_dir, app)
+    index_page.render_and_save(renderer)
 
 
 class ExampleSource:

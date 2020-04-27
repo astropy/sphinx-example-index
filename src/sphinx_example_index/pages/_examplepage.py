@@ -4,12 +4,13 @@
 __all__ = ["ExamplePage"]
 
 import os
-from typing import TYPE_CHECKING
+from typing import TYPE_CHECKING, List
 
 if TYPE_CHECKING:
     from sphinx.application import Sphinx
     from sphinx_example_index.preprocessor import ExampleSource
-    from sphinx_example_index.pages import Renderer
+    from sphinx_example_index.pages._renderer import Renderer
+    from sphinx_example_index.pages._tagpage import TagPage
 
 
 class ExamplePage:
@@ -33,6 +34,7 @@ class ExamplePage:
         self._examples_dir = examples_dir
         self._app = app
         self._srcdir = app.srcdir
+        self._tag_pages: "List[TagPage]" = []
 
     @property
     def source(self) -> "ExampleSource":
@@ -110,6 +112,34 @@ class ExamplePage:
         """
         return os.path.join(self._examples_dir, self.rel_docref + ".rst")
 
+    def insert_tag_page(self, tag_page: "TagPage") -> None:
+        """Associate a tag page with the example page.
+
+        Typically this API is called by
+        `sphinx_example_index.pages.TagPage.generate_tag_pages`, which
+        simultaneously creates tag pages and associates eample pages with
+        those tag pages.
+
+        Parameters
+        ----------
+        tag_page : sphinx_example_index.pages.TagPage
+            A tag page.
+
+        See also
+        --------
+        tag_pages
+        """
+        self._tag_pages.append(tag_page)
+        self._tag_pages.sort()
+
+    @property
+    def tag_pages(self) -> "List[TagPage]":
+        """Sequence of tag pages
+        (`sphinx_astropy.ext.examples.indexpages.TagPage`) associated with
+        the example page.
+        """
+        return self._tag_pages
+
     def render(self, renderer: "Renderer") -> str:
         """Render the source for the standalone example page using a
         ``astropy_example/examplepage.rst`` template.
@@ -126,7 +156,7 @@ class ExamplePage:
         """
         context = {
             "title": self.source.title,
-            # 'tag_pages': self.tag_pages,
+            "tag_pages": self.tag_pages,
             "example": self.source,
         }
         return renderer.render("example_index/examplepage.rst", context)

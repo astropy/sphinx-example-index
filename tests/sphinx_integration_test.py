@@ -12,7 +12,7 @@ from bs4 import BeautifulSoup
 
 from tests.utils import is_directive_registered, is_node_registered
 
-from sphinx_example_index.pages import ExamplePage, Renderer
+from sphinx_example_index.pages import ExamplePage, Renderer, TagPage
 from sphinx_example_index.marker import ExampleMarkerNode, EXAMPLE_SRC_DIV_CLASS
 from sphinx_example_index.preprocessor import detect_examples
 
@@ -143,7 +143,52 @@ def test_example_page(
         "Example with two paragraphs\n"
         "###########################\n"
         "\n"
-        "From :doc:`/page-with-examples`."
+        "From :doc:`/page-with-examples`.\n"
+    )
+    assert rendered_page == expected
+
+
+@pytest.mark.sphinx("dummy", testroot="example-index")
+def test_example_page_tagged(
+    app: "Sphinx", status: "StringIO", warning: "StringIO"
+) -> None:
+    """Test ExamplePage and Renderer using a tagged example from the
+    ``page-with-examples.rst`` test case.
+    """
+    env = app.env
+    renderer = Renderer(builder=app.builder, h1_underline="#")
+
+    # Test using example-with-multiple-tags
+    test_filepath = os.path.join(app.srcdir, "page-with-examples.rst")
+    examples = list(detect_examples(test_filepath, env))
+    example = examples[2]
+
+    examples_dir = os.path.join(
+        app.srcdir, app.config.example_index_dir  # type: ignore
+    )
+    example_page = ExamplePage(
+        source=example, examples_dir=examples_dir, app=app
+    )
+    # Generate a tag page to associate with the example page
+    for tag_page in TagPage.generate_tag_pages(
+        example_pages=[example_page], examples_dir=examples_dir, app=app
+    ):
+        tag_page.render_and_save(renderer)
+
+    assert example_page.source == example
+    assert example_page.rel_docref == "example-with-multiple-tags"
+    assert example_page.docref == "/examples/example-with-multiple-tags"
+
+    rendered_page = example_page.render(renderer)
+    expected = (
+        "Example with multiple tags\n"
+        "##########################\n"
+        "\n"
+        "From :doc:`/page-with-examples`.\n"
+        "\n"
+        "Tagged:\n"
+        ":doc:`tag-a </examples/tags/tag-a>`,\n"
+        ":doc:`tag-b </examples/tags/tag-b>`."
     )
     assert rendered_page == expected
 
@@ -196,6 +241,8 @@ def test_preprocessor(
     examples_source_dir = os.path.join(
         app.srcdir, app.config.example_index_dir  # type: ignore
     )
+
+    # Ensure example pages are written
     example_page_names = [
         "example-with-two-paragraphs.rst",
         "tagged-example.rst",
@@ -207,3 +254,15 @@ def test_preprocessor(
     ]
     for path in example_page_paths:
         assert os.path.exists(path)
+
+    # Ensure tag pages are written
+    tag_names = ["tag-a.rst", "tag-b.rst"]
+    tag_page_paths = [
+        os.path.join(examples_source_dir, "tags", n) for n in tag_names
+    ]
+    for path in tag_page_paths:
+        assert os.path.exists(path)
+
+    # Ensure the index page is written
+    index_path = os.path.join(examples_source_dir, "index.rst")
+    assert os.path.exists(index_path)

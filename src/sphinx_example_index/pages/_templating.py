@@ -75,7 +75,6 @@ class Renderer:
         built_in_template_dirs = [
             os.path.join(os.path.dirname(__file__), "..", "data", "templates")
         ]
-        print(built_in_template_dirs)
         loader = BuiltinTemplateLoader()
         loader.init(builder, dirs=built_in_template_dirs)
 
