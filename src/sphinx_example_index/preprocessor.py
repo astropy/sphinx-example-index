@@ -13,9 +13,10 @@ __all__ = [
 import os
 import re
 import shutil
-from typing import Iterator, Set, TYPE_CHECKING
+from typing import Iterator, Set, TYPE_CHECKING, List
 
 from sphinx.util.logging import getLogger
+from sphinx.errors import SphinxError
 
 from sphinx_example_index.identifiers import format_title_to_example_id
 from sphinx_example_index.pages import ExamplePage, TagPage, IndexPage, Renderer
@@ -109,6 +110,9 @@ def preprocess_examples(app: "Sphinx") -> None:
 
     index_page = IndexPage(example_pages, examples_dir, app)
     index_page.render_and_save(renderer)
+
+    # Cache examples into the application environment
+    cache_examples(app.env, example_pages)
 
 
 class ExampleSource:
@@ -218,3 +222,68 @@ def detect_examples(
             tags = set()
 
         yield ExampleSource(title=title, docname=src_docname, tags=tags)
+
+
+def cache_examples(
+    env: "BuildEnvironment", example_pages: List[ExamplePage]
+) -> None:
+    """Cache metadata about examples and standalone example pages into the
+    build environment.
+
+    Parameters
+    ----------
+    env : sphinx.environment.BuildEnvironment
+        The Sphinx build environment.
+    example_pages : list
+        List of `sphinx_astropy.ext.example.examplepages.ExamplePage` instances
+        for each generated standalone example page.
+
+    Raises
+    ------
+    sphinx.error.SphinxError
+        Raised if multiple examples share the same title (or ID).
+
+    Notes
+    -----
+    This function add an attribute called ``ext_example_index`` to the
+    build environment. The attribute maps example IDs to a mapping of metadata
+    about each example. Metadata keys are:
+
+    source_docname
+        docname of the page where the example originated from.
+    source_path
+        File path of the rst file where the example originated from.
+    docname
+        docname of the standalone example page.
+    path
+        File path of the standalone example page (rst).
+    title
+        Title of the example.
+    tags
+        Set of tags (strings) associated with the example.
+    """
+    # Whenever we access ext_example_index we need to ignore the type because
+    # BuildEnvironment isn't made for mypy to identify dynamic types.
+    env.ext_example_index = {}  # type: ignore
+    for example_page in example_pages:
+        example_id = example_page.source.example_id
+        if example_id in env.ext_example_index:  # type: ignore
+            _existing = env.ext_example_index[example_id]  # type: ignore
+            assert isinstance(_existing, dict)
+            message = (
+                "There is already an example titled {0!r}\n"
+                "  a: {1!s}\n  b: {2!s}"
+            ).format(
+                example_page.source.title,
+                _existing["source_docname"],
+                example_page.source.docname,
+            )
+            raise SphinxError(message)
+        env.ext_example_index[example_id] = {  # type:ignore
+            "source_docname": example_page.source.docname,
+            "source_path": env.doc2path(example_page.source.docname),
+            "path": example_page.filepath,
+            "docname": example_page.docname,
+            "title": example_page.source.title,
+            "tags": example_page.source.tags,
+        }

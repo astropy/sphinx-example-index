@@ -278,3 +278,49 @@ def test_preprocessor(
     # Ensure the index page is written
     index_path = os.path.join(examples_source_dir, "index.rst")
     assert os.path.exists(index_path)
+
+
+@pytest.mark.sphinx("dummy", testroot="example-index")
+def test_example_env_persistence(
+    app: "Sphinx", status: "StringIO", warning: "StringIO"
+) -> None:
+    """Test that the examples are added to the app env by
+    `sphinx_example_index.preprocessor.cache_examples`.
+    """
+    app.verbosity = 2
+    logging.setup(app, status, warning)
+    app.builder.build_all()
+
+    assert hasattr(app.env, "ext_example_index")
+    examples = app.env.ext_example_index  # type: ignore
+
+    known_examples = [
+        "example-with-two-paragraphs",
+        "tagged-example",
+        "example-with-multiple-tags",
+        "example-with-subsections",
+    ]
+    for k in known_examples:
+        assert k in examples
+
+    # Test tags
+    assert examples["example-with-two-paragraphs"]["tags"] == set()
+    assert examples["tagged-example"]["tags"] == set(["tag-a"])
+    assert examples["example-with-multiple-tags"]["tags"] == set(
+        ["tag-a", "tag-b"]
+    )
+
+    ex = examples["example-with-two-paragraphs"]
+
+    # Test title
+    assert ex["title"] == "Example with two paragraphs"
+
+    # Test docnames
+    assert ex["source_docname"] == "page-with-examples"
+    assert ex["docname"] == "examples/example-with-two-paragraphs"
+
+    # Test paths
+    assert ex["source_path"].endswith("page-with-examples.rst")
+    assert os.path.exists(ex["source_path"])
+    assert ex["path"].endswith("example-with-two-paragraphs.rst")
+    assert os.path.exists(ex["path"])
