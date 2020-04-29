@@ -1,10 +1,21 @@
 # Licensed under a 3-clause BSD style license - see LICENSE.rst
 """The reStructuredText page generated for each example."""
 
-__all__ = ["ExamplePage"]
+__all__ = [
+    "ExamplePage",
+    "ExampleContentNode",
+    "visit_example_content_html",
+    "depart_example_content_html",
+    "ExampleContentDirective",
+]
 
 import os
-from typing import TYPE_CHECKING, List
+from typing import TYPE_CHECKING, List, Any
+
+from docutils import nodes
+from docutils.parsers.rst import Directive
+
+from sphinx.util.logging import getLogger
 
 if TYPE_CHECKING:
     from sphinx.application import Sphinx
@@ -173,3 +184,57 @@ class ExamplePage:
         content = self.render(renderer)
         with open(self.filepath, "w") as fh:
             fh.write(content)
+
+
+class ExampleContentNode(nodes.container):
+    """Docutils node that provides a placeholder for the content of an example.
+
+    This node is inserted by the `ExampleContentDirective` directive.
+    """
+
+
+def visit_example_content_html(self: Any, node: ExampleContentNode) -> None:
+    """HTML visitor for the `ExampleContentNode`.
+
+    In HTML, marked up examples are wrapped in a ``<div>`` tag with a class
+    of ``astropy-example-content``.
+    """
+    # The class is used by the HTML postprocessor to capture the HTML of
+    # examples. The content of the div gets re-posted onto the stand-alone
+    # example pages.
+    self.body.append(self.starttag(node, "div", CLASS="example-index-content"))
+
+
+def depart_example_content_html(self: Any, node: ExampleContentNode) -> None:
+    """HTML departure handler for the `ExampleContentNode`.
+    """
+    self.body.append("</div>")
+
+
+class ExampleContentDirective(Directive):
+    """A directive that inserts an ExampleContentNode into the page to mark
+    where the corresponding example content (from ``ExampleMarkerDirective``)
+    is added in the HTML post-processing phase.
+
+    Example:
+
+    .. code-block:: rst
+
+       .. example-content:: example-id
+
+    The argument is the ID of the example.
+    """
+
+    _logger = getLogger(__name__)
+    has_content = False
+    required_arguments = 1  # example ID
+
+    def run(self) -> List[nodes.Node]:
+        self.env = self.state.document.settings.env
+        self.example_id = self.arguments[0].strip()
+
+        content_node = ExampleContentNode()
+        # In docutils, the first item in 'ids' becomes the HTML id.
+        content_node["ids"] = [self.example_id]
+
+        return [content_node]

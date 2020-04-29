@@ -12,7 +12,12 @@ from bs4 import BeautifulSoup
 
 from tests.utils import is_directive_registered, is_node_registered
 
-from sphinx_example_index.pages import ExamplePage, Renderer, TagPage
+from sphinx_example_index.pages import (
+    ExamplePage,
+    Renderer,
+    TagPage,
+    ExampleContentNode,
+)
 from sphinx_example_index.marker import ExampleMarkerNode, EXAMPLE_SRC_DIV_CLASS
 from sphinx_example_index.preprocessor import detect_examples
 
@@ -30,6 +35,7 @@ def test_setup(app: "Sphinx", status: "StringIO", warning: "StringIO") -> None:
 
     # Check registered directives
     assert is_directive_registered("example")
+    assert is_directive_registered("example-content")
 
     # Check registered configs
     assert "example_index_dir" in app.config  # type: ignore
@@ -38,6 +44,7 @@ def test_setup(app: "Sphinx", status: "StringIO", warning: "StringIO") -> None:
 
     # Check registered nodes
     assert is_node_registered(ExampleMarkerNode)
+    assert is_node_registered(ExampleContentNode)
 
 
 @pytest.mark.sphinx("html", testroot="example-index")
@@ -144,6 +151,9 @@ def test_example_page(
         "###########################\n"
         "\n"
         "From :doc:`/page-with-examples`.\n"
+        "\n"
+        "\n"
+        ".. example-content:: example-with-two-paragraphs"
     )
     assert rendered_page == expected
 
@@ -188,7 +198,9 @@ def test_example_page_tagged(
         "\n"
         "Tagged:\n"
         ":doc:`tag-a </examples/tags/tag-a>`,\n"
-        ":doc:`tag-b </examples/tags/tag-b>`."
+        ":doc:`tag-b </examples/tags/tag-b>`.\n"
+        "\n"
+        ".. example-content:: example-with-multiple-tags"
     )
     assert rendered_page == expected
 

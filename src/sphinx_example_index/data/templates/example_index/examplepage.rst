@@ -7,3 +7,5 @@ Tagged:
 :doc:`{{ tag_page.name }} <{{ tag_page.docref }}>`{% if not loop.last %},{% else %}.{% endif %}
 {%- endfor %}
 {%- endif %}
+
+.. example-content:: {{ example.example_id }}

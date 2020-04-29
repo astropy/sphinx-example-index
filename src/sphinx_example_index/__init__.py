@@ -19,6 +19,12 @@ from sphinx_example_index.marker import (
     ExampleMarkerDirective,
 )
 from sphinx_example_index.preprocessor import preprocess_examples
+from sphinx_example_index.pages import (
+    ExampleContentNode,
+    visit_example_content_html,
+    depart_example_content_html,
+    ExampleContentDirective,
+)
 
 if TYPE_CHECKING:
     from sphinx.application import Sphinx
@@ -45,8 +51,13 @@ def setup(app: "Sphinx") -> Dict[str, Any]:
         ExampleMarkerNode,
         html=(visit_example_marker_html, depart_example_marker_html),
     )
+    app.add_node(
+        ExampleContentNode,
+        html=(visit_example_content_html, depart_example_content_html),
+    )
 
     app.add_directive("example", ExampleMarkerDirective)
+    app.add_directive("example-content", ExampleContentDirective)
 
     app.connect("builder-inited", preprocess_examples)
 
