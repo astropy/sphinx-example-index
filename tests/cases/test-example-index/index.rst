@@ -7,3 +7,4 @@ This test site  exercises the main functionality of the sphinx-example-index ext
 .. toctree::
 
    page-with-examples
+   examples/index

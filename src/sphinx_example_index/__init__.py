@@ -25,6 +25,7 @@ from sphinx_example_index.pages import (
     depart_example_content_html,
     ExampleContentDirective,
 )
+from sphinx_example_index.postprocessor import postprocess_examples
 
 if TYPE_CHECKING:
     from sphinx.application import Sphinx
@@ -60,6 +61,7 @@ def setup(app: "Sphinx") -> Dict[str, Any]:
     app.add_directive("example-content", ExampleContentDirective)
 
     app.connect("builder-inited", preprocess_examples)
+    app.connect("build-finished", postprocess_examples)
 
     # Toggles the gallery generation on or off.
     app.add_config_value("example_index_enabled", False, "env")

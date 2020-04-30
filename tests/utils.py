@@ -1,7 +1,13 @@
 # Licensed under a 3-clause BSD style license - see LICENSE.rst
 """Test utilities."""
 
-__all__ = ["is_directive_registered"]
+__all__ = [
+    "is_directive_registered",
+    "is_node_registered",
+    "Build",
+]
+
+from typing import NamedTuple
 
 from docutils import nodes
 from docutils.parsers.rst import directives
@@ -44,3 +50,11 @@ def is_node_registered(node: nodes.Node) -> bool:
         `True` if the node is loaded, `False` otherwise.
     """
     return hasattr(nodes.GenericNodeVisitor, "visit_" + node.__name__)
+
+
+class Build(NamedTuple):
+    """Build result."""
+
+    src_dir: str
+    build_dir: str
+    status: int
