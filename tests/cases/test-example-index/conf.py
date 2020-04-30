@@ -1,8 +1,14 @@
 master_doc = "index"  # for Sphinx <2.0
 extensions = [
+    'sphinx.ext.autodoc',
+    'sphinx.ext.intersphinx',
+    'numpydoc',
     "sphinx_example_index"
 ]
 exclude_patterns = ["_build", "_includes"]
 suppress_warnings = ["app.add_directive", "app.add_node"]
 default_role = "obj"
+intersphinx_mapping = {
+    'astropy': ('https://docs.astropy.org/en/stable/', None),
+}
 example_index_enabled = True
