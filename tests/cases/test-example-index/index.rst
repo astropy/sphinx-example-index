@@ -9,6 +9,7 @@ This test site  exercises the main functionality of the sphinx-example-index ext
    page-with-examples
    links
    ref-targets
+   images
    examples/index
 
 .. _api:

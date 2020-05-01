@@ -16,6 +16,7 @@ from tests.utils import (
     parse_example_page,
     contains_href,
     contains_external_href,
+    contains_linked_img,
 )
 
 if TYPE_CHECKING:
@@ -136,5 +137,45 @@ def test_named_equation(example_index_build: Build) -> None:
     label, and a reference to that label.
     This shows that the link points back to the original equation.
     """
-    soup = parse_example_page(example_index_build.build_dir, "named-equation")
-    assert contains_href(soup, "#equation-euler")
+    tree = parse_example_page(example_index_build.build_dir, "named-equation")
+    assert contains_href(tree, "#equation-euler")
+
+
+@pytest.mark.skipif(sphinx_version <= (1, 7), reason=NO_SPHINX_17_MESSAGE)
+def test_example_with_an_image(example_index_build: Build) -> None:
+    """A regular image directive with a relative URI to a local image."""
+    tree = parse_example_page(
+        example_index_build.build_dir, "example-with-an-image"
+    )
+    assert contains_linked_img(tree, "../_images/astropy_project_logo.svg")
+
+
+@pytest.mark.skipif(sphinx_version <= (1, 7), reason=NO_SPHINX_17_MESSAGE)
+def test_example_with_an_external_image(example_index_build: Build) -> None:
+    """A regular image directive with an external URI."""
+    tree = parse_example_page(
+        example_index_build.build_dir, "example-with-an-external-image"
+    )
+    assert contains_linked_img(
+        tree, "https://www.astropy.org/images/astropy_project_logo.svg"
+    )
+
+
+@pytest.mark.skipif(sphinx_version <= (1, 7), reason=NO_SPHINX_17_MESSAGE)
+def test_example_with_a_figure(example_index_build: Build) -> None:
+    """A figure directive with a relative URI to a local image."""
+    tree = parse_example_page(
+        example_index_build.build_dir, "example-with-a-figure"
+    )
+    assert contains_linked_img(tree, "../_images/astropy_project_logo.svg")
+
+
+@pytest.mark.skipif(sphinx_version <= (1, 7), reason=NO_SPHINX_17_MESSAGE)
+def test_example_with_an_external_figure(example_index_build: Build) -> None:
+    """A figure directive with a external image URI."""
+    tree = parse_example_page(
+        example_index_build.build_dir, "example-with-an-external-figure"
+    )
+    assert contains_linked_img(
+        tree, "https://www.astropy.org/images/astropy_project_logo.svg"
+    )
