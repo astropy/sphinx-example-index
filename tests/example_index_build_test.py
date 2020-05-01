@@ -4,6 +4,7 @@ in order to fully run the build-finished events.
 """
 
 import os
+import re
 import shutil
 from typing import TYPE_CHECKING
 
@@ -192,3 +193,52 @@ def test_matplotlib_plot(example_index_build: Build) -> None:
 
     img_tag = tree.select(".body img")[0]
     assert img_tag["src"] == "../_images/matplotlib-1.png"
+
+
+@pytest.mark.skipif(sphinx_version <= (1, 7), reason=NO_SPHINX_17_MESSAGE)
+def test_file_download_example(example_index_build: Build) -> None:
+    """Test the link made by a download directive to a file hosted on the
+    site itself.
+    """
+    tree = parse_example_page(
+        example_index_build.build_dir, "file-download-example"
+    )
+    for tag in tree.select(".body a.reference.download.internal"):
+        match = re.match(r"../_downloads/[a-z0-9]+/hello\.py", tag["href"])
+        if match is not None:
+            return
+    assert False  # link was not found
+
+
+@pytest.mark.skipif(sphinx_version <= (1, 7), reason=NO_SPHINX_17_MESSAGE)
+def test_absolute_file_download_example(example_index_build: Build) -> None:
+    """Test an absolute link to a file hosted on the site, made with a download
+    directive.
+    """
+    tree = parse_example_page(
+        example_index_build.build_dir, "absolute-file-download-example"
+    )
+    for tag in tree.select(".body a.reference.download.internal"):
+        match = re.match(
+            r"../_downloads/[a-z0-9]+/astropy_project_logo\.svg", tag["href"]
+        )
+        if match is not None:
+            return
+    assert False  # link was not found
+
+
+@pytest.mark.skipif(sphinx_version <= (1, 7), reason=NO_SPHINX_17_MESSAGE)
+def test_external_file_download_example(example_index_build: Build) -> None:
+    """Test an absolute link to a file hosted on the site, made with a download
+    directive.
+    """
+    tree = parse_example_page(
+        example_index_build.build_dir, "external-file-download-example"
+    )
+    expected_href = (
+        "https://raw.githubusercontent.com/astropy/astropy/master/README.rst"
+    )
+    for tag in tree.select(".body a.reference.download.external"):
+        if tag["href"] == expected_href:
+            return
+    assert False  # link was not found
