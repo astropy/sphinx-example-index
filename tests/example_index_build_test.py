@@ -179,3 +179,16 @@ def test_example_with_an_external_figure(example_index_build: Build) -> None:
     assert contains_linked_img(
         tree, "https://www.astropy.org/images/astropy_project_logo.svg"
     )
+
+
+@pytest.mark.skipif(sphinx_version <= (1, 7), reason=NO_SPHINX_17_MESSAGE)
+def test_matplotlib_plot(example_index_build: Build) -> None:
+    """A matplotlib-based plot directive."""
+    tree = parse_example_page(example_index_build.build_dir, "matplotlib-plot")
+    assert contains_external_href(tree, "../matplotlib-1.py")
+    assert contains_external_href(tree, "../matplotlib-1.png")
+    assert contains_external_href(tree, "../matplotlib-1.hires.png")
+    assert contains_external_href(tree, "../matplotlib-1.pdf")
+
+    img_tag = tree.select(".body img")[0]
+    assert img_tag["src"] == "../_images/matplotlib-1.png"

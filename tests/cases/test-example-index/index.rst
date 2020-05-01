@@ -10,6 +10,7 @@ This test site  exercises the main functionality of the sphinx-example-index ext
    links
    ref-targets
    images
+   matplotlib
    examples/index
 
 .. _api:
