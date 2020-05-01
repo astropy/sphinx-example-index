@@ -72,6 +72,9 @@ jobs:
         with:
           fetch-depth: 0  # setuptools_scm needs full history
 
+      - name: Install graphviz
+        run: sudo apt-get install graphviz
+
       - name: Set up Python
         uses: actions/setup-python@v1
         with:

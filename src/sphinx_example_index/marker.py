@@ -40,7 +40,7 @@ def visit_example_marker_html(self: Any, node: ExampleMarkerNode) -> None:
     """HTML visitor for the `ExampleMarkerNode`.
 
     In HTML, marked up examples are wrapped in a ``<div>`` tag with a class
-    name corresponding to `EXAMPLE_DIV_CLASS.
+    name corresponding to `EXAMPLE_DIV_CLASS`.
     """
     # The class is used by the HTML postprocessor to capture the HTML of
     # examples. The content of the div gets re-posted onto the stand-alone

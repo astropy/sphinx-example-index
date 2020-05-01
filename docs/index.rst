@@ -14,16 +14,19 @@ The extension will:
 - Generate an index of all the examples.
 - Generate an index page for each unique tag.
 
-Reference/API
-=============
-
-.. automodapi:: sphinx_example_index
-
-Project Information
-===================
+Getting started
+===============
 
 .. toctree::
    :maxdepth: 1
 
    changelog
+
+Contributor's guide
+===================
+
+.. toctree::
+   :maxdepth: 1
+
    development-guide
+   api
