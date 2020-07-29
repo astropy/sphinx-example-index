@@ -32,7 +32,7 @@ You can run tests against the latest release of Sphinx, as well as validate code
 
 .. code-block:: bash
 
-   tox -e py-test-cov,codestyle
+   tox -e py-test-cov,codestyle,typing
 
 That command uses your computer's default version of Python.
 
@@ -82,6 +82,16 @@ You can run flake8_ through tox_:
 As a product of the Astropy Project, ``sphinx-example-index`` adheres to the `Astropy Coding Guidelines <http://docs.astropy.org/en/latest/development/codeguide.html>`__.
 There are some areas where this project can't follow those guidelines, though, because ``sphinx-example-index`` is upstream of the ``astropy`` package.
 For example, this project doesn't use utilities and configuration infrastructure provided by the ``astropy`` package itself.
+
+Type Annotations
+================
+
+This codebase uses Python type annotations, which are checked with Mypy_.
+You can validate typing by running tox:
+
+.. code-block:: bash
+
+   tox -e typing
 
 Documentation Style
 ===================

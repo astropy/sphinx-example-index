@@ -30,6 +30,7 @@ rst_epilog = """
 .. _Sphinx: https://www.sphinx-doc.org/en/master/
 .. _tox: https://tox.readthedocs.io/en/latest/
 .. _flake8: https://flake8.pycqa.org/en/latest/
+.. _Mypy: https://mypy.readthedocs.io/en/stable/
 """
 
 # Configuration for intersphinx
