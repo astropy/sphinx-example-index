@@ -27,7 +27,7 @@ pkg_metadata = importlib_metadata.metadata('sphinx-example-index')
 rst_epilog = """
 
 .. _Astropy: https://www.astropy.org
-.. _Sphinx: https://www.sphinx-doc.org/en/master/
+.. _Sphinx: https://www.sphinx-doc.org/en/main/
 .. _tox: https://tox.readthedocs.io/en/latest/
 .. _flake8: https://flake8.pycqa.org/en/latest/
 """
@@ -48,8 +48,8 @@ needs_sphinx = '1.7'
 # directories to ignore when looking for source files.
 exclude_patterns = ['_build', '_templates']
 
-# The master toctree document.
-master_doc = 'index'
+# The main toctree document.
+main_doc = 'index'
 
 # The reST default role (used for this markup: `text`) to use for all
 # documents. Set to the "smart" one.

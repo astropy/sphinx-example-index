@@ -2,7 +2,7 @@
 Sphinx extension for collecting examples from narrative documentation
 #####################################################################
 
-Your `Sphinx <https://www.sphinx-doc.org/en/master/>`__ documentation pages contain a lot of information: overviews, examples, how-tos, and references.
+Your `Sphinx <https://www.sphinx-doc.org/en/main/>`__ documentation pages contain a lot of information: overviews, examples, how-tos, and references.
 Embedded within your documentation pages might be useful standalone content.
 This content makes sense in the flow of your existing documentation, but it might also get lost.
 The ``sphinx-example-index`` extension helps you to resurface content into easily-discovered standalone pages.
